@@ -48,10 +48,10 @@ jobs:
 
       - name: Build (clang)
         run: |
-          xmake config --yes --mode=${{ matrix.build_type }} --toolchain=clang
+          xmake config --clean --yes --mode=${{ matrix.build_type }} --toolchain=clang
           xmake build  --yes --verbose --diagnosis
 
       - name: Build (msvc)
         run: |
-          xmake config --yes --mode=${{ matrix.build_type }}
+          xmake config --clean --yes --mode=${{ matrix.build_type }}
           xmake build  --yes --verbose --diagnosis

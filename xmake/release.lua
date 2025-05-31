@@ -20,7 +20,7 @@ function main(...)
     print("current commit: ", current_commit)
 
     os.vexecv(os.programfile(), {"config", "--clean", "--yes", "--dev=n", "--policies=build.optimization.lto:y"})
-    os.vexecv(os.programfile(), {"pack"})
+    os.vexecv(os.programfile(), {"pack", "--yes"})
 
     if not opt.ci then
         return
