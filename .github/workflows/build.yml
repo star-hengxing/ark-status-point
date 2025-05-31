@@ -1,0 +1,53 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.clang-format'
+      - '.editorconfig'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '.clang-format'
+      - '.editorconfig'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+
+jobs:
+  windows:
+    strategy:
+      matrix:
+        os: [windows-2025]
+        build_type: [debug, release]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@master
+          actions-cache-folder: '.xmake-cache'
+          actions-cache-key: ${{ matrix.os }}
+          package-cache: true
+          package-cache-key: ${{ matrix.os }}-${{ matrix.build_type }}
+          build-cache: false
+          build-cache-key: ${{ matrix.os }}-${{ matrix.build_type }}
+
+      - name: Build (clang)
+        run: |
+          xmake config --yes --mode=${{ matrix.build_type }} --toolchain=clang
+          xmake build --verbose --diagnosis
+
+      - name: Build (msvc)
+        run: |
+          xmake config --yes --mode=${{ matrix.build_type }}
+          xmake build --verbose --diagnosis

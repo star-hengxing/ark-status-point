@@ -1,0 +1,32 @@
+name: release
+
+on:
+  push:
+    tags: [ "*" ]
+
+jobs:
+  windows:
+    strategy:
+      matrix:
+        os: [windows-2025]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@master
+          actions-cache-folder: '.xmake-cache'
+          actions-cache-key: ${{ matrix.os }}
+          package-cache: false
+          build-cache: false
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          xmake l xmake/release.lua --ci
