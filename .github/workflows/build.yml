@@ -27,6 +27,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    concurrency:
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-windows-${{ matrix.build_type }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,9 +49,9 @@ jobs:
       - name: Build (clang)
         run: |
           xmake config --yes --mode=${{ matrix.build_type }} --toolchain=clang
-          xmake build --verbose --diagnosis
+          xmake build  --yes --verbose --diagnosis
 
       - name: Build (msvc)
         run: |
           xmake config --yes --mode=${{ matrix.build_type }}
-          xmake build --verbose --diagnosis
+          xmake build  --yes --verbose --diagnosis
