@@ -16,6 +16,9 @@ end
 function main(...)
     local opt = option.parse({...}, options, "xmake l xmake/release.lua --ci") or {}
 
+    local tag = _get_current_tag()
+    local current_commit = _get_current_commit_hash()
+
     print("current tag: ", tag)
     print("current commit: ", current_commit)
 
