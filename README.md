@@ -4,7 +4,7 @@ A lightweight ARK: Survival Evolved mod.
 
 source: https://github.com/star-hengxing/ark-status-point
 
-- ![person_info](img/person_info.png)
+- ![dino_info](img/dino_info.png)
 
 Support version:
 - 358.25
@@ -12,7 +12,7 @@ Support version:
 # Features
 
 - [x] Person status point.
-- [ ] Dino status point.
+- [x] Dino status point.
 
 # Usage
 
@@ -48,3 +48,4 @@ xmake run
 # Credits
 
 - [Detours](https://github.com/microsoft/Detours)
+- [fmt](https://github.com/fmtlib/fmt)
