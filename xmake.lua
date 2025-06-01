@@ -1,6 +1,6 @@
 set_project("ark-status-point")
 
-set_version("0.0.1")
+set_version("1.0.0")
 
 set_xmakever("2.9.9")
 
