@@ -1,6 +1,8 @@
 add_moduledirs("modules")
 
 add_defines("WIN32_LEAN_AND_MEAN")
+
+add_shflags("/NOIMPLIB", {tools = "link"})
 if is_mode("release") then
     -- remove debug dir
     add_shflags("/EMITPOGOPHASEINFO", {force = true, tools = "link"})
