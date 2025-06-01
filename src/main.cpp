@@ -51,18 +51,21 @@ void __fastcall GetStatusValueString(void* self, void* result, int ValueType, vo
     switch (static_cast<ark::Status>(ValueType))
     {
         using enum ark::Status;
-    case hp:
-    case stamina:
-    case oxygen:
-    case food:
-    case water:
-    case weight:
-    case melee:
-    case speed:
-    case fortitude:
-    case crafting:
-        status = static_cast<ark::Status>(ValueType);
-        break;
+        case health:
+        case stamina:
+        // case torpor:
+        case oxygen:
+        case food:
+        case water:
+        case weight:
+        case melee_damage:
+        case movement_speed:
+        case fortitude:
+        case crafting_speed:
+        {
+            status = static_cast<ark::Status>(ValueType);
+            break;
+        }
     default:
         status = none;
         break;
