@@ -1,8 +1,9 @@
 #include <string_view>
-#include <format>
 
 #include <windows.h>
 #include <detours.h>
+
+#include <fmt/xchar.h>
 
 #include "base/basic_type.hpp"
 #include "helpful.hpp"
@@ -85,13 +86,13 @@ void __fastcall GetStatusValueString(void* self, void* result, int ValueType, vo
         if (ValueType < 8)
         {
             auto str = reinterpret_cast<wchar_t*>(status_string_address1);
-            auto end = std::format_to(str, L"{} + {} | %.1f / ", point, tame_point);
+            auto end = fmt::format_to(str, L"{} + {} | %.1f / ", point, tame_point);
             *end = '\0';
         }
         else
         {
             auto str = reinterpret_cast<wchar_t*>(status_string_address2);
-            auto end = std::format_to(str, L"{} + {} | %.1f %%", point, tame_point);
+            auto end = fmt::format_to(str, L"{} + {} | %.1f %%", point, tame_point);
             *end = '\0';
         }
     }
@@ -100,13 +101,13 @@ void __fastcall GetStatusValueString(void* self, void* result, int ValueType, vo
         if (ValueType < 8)
         {
             auto str = reinterpret_cast<wchar_t*>(status_string_address1);
-            auto end = std::format_to(str, L"{} | %.1f / ", point);
+            auto end = fmt::format_to(str, L"{} | %.1f / ", point);
             *end = '\0';
         }
         else
         {
             auto str = reinterpret_cast<wchar_t*>(status_string_address2);
-            auto end = std::format_to(str, L"{} | %.1f %%", point);
+            auto end = fmt::format_to(str, L"{} | %.1f %%", point);
             *end = '\0';
         }
     }

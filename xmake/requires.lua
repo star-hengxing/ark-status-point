@@ -1,3 +1,3 @@
 -- dev
 
-add_requires("microsoft-detours")
+add_requires("microsoft-detours", "fmt")

@@ -9,7 +9,7 @@ end
 target("ark-status-point")
     set_kind("shared")
     add_files("*.cpp")
-    add_packages("microsoft-detours")
+    add_packages("microsoft-detours", "fmt")
     add_syslinks("user32")
 
     add_deps("dwmapi", {inherit = false})
