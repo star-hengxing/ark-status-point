@@ -94,7 +94,7 @@ void __fastcall GetStatusValueString(void* self, void* result, int ValueType, vo
     else
     {
         auto str = reinterpret_cast<wchar_t*>(status_string_address2);
-        std::memcpy(status_string_address2, status_string1.data(), (status_string2.size() + 1) * sizeof(wchar_t));
+        std::memcpy(status_string_address2, status_string2.data(), (status_string2.size() + 1) * sizeof(wchar_t));
         u8_to_str(point, str);
     }
 
