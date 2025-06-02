@@ -9,22 +9,22 @@
 #include "helpful.hpp"
 #include "ark.hpp"
 
-std::byte* status_string_address1;
-std::byte* status_string_address2;
+std::byte* max_status_string_address1;
+std::byte* max_status_string_address2;
 bool is_single_player = true;
 
 static void update_person_status(u8 point, int ValueType) noexcept
 {
     if (ValueType < 8)
     {
-        auto str = reinterpret_cast<wchar_t*>(status_string_address1);
-        auto end = fmt::format_to(str, L"{} | %.1f / ", point);
+        auto str = reinterpret_cast<wchar_t*>(max_status_string_address1);
+        auto end = fmt::format_to(str, L"%.1f | {}", point);
         *end = '\0';
     }
     else
     {
-        auto str = reinterpret_cast<wchar_t*>(status_string_address2);
-        auto end = fmt::format_to(str, L"{} | %.1f %%", point);
+        auto str = reinterpret_cast<wchar_t*>(max_status_string_address2);
+        auto end = fmt::format_to(str, L"%.1f %% | {}", point);
         *end = '\0';
     }
 }
@@ -39,14 +39,14 @@ void single_player(void* self, int ValueType, bool is_dino) noexcept
         auto const tame_point = NumberOfLevelUpPointsAppliedTamed[ValueType];
         if (ValueType < 8)
         {
-            auto str = reinterpret_cast<wchar_t*>(status_string_address1);
-            auto end = fmt::format_to(str, L"{} + {} | %.1f / ", point, tame_point);
+            auto str = reinterpret_cast<wchar_t*>(max_status_string_address1);
+            auto end = fmt::format_to(str, L"%.1f | {} + {}", point, tame_point);
             *end = '\0';
         }
         else
         {
-            auto str = reinterpret_cast<wchar_t*>(status_string_address2);
-            auto end = fmt::format_to(str, L"{} + {} | %.1f %%", point, tame_point);
+            auto str = reinterpret_cast<wchar_t*>(max_status_string_address2);
+            auto end = fmt::format_to(str, L"%.1f %% | {} + {}", point, tame_point);
             *end = '\0';
         }
     }
@@ -102,8 +102,8 @@ void server_player(void* self, int ValueType, bool is_dino) noexcept
 
 NAMESPACE_BEGIN(original)
 
-constexpr std::wstring_view status_string1 = L"%.1f / ";
-constexpr std::wstring_view status_string2 = L"%.1f %%";
+constexpr std::wstring_view max_status_string1 = L"%.1f";
+constexpr std::wstring_view max_status_string2 = L"%.1f %%";
 
 using fn_IsPrimalDino = bool(__fastcall*)(void* self);
 
@@ -114,11 +114,8 @@ NAMESPACE_END(original)
 
 NAMESPACE_BEGIN(hook)
 
-// constexpr std::wstring_view person_status_string1 = L"254 | %.1f / ";
-// constexpr std::wstring_view person_status_string2 = L"254 | %.1f %%";
-
-constexpr std::wstring_view dino_status_string1 = L"254 + 254 | %.1f / ";
-constexpr std::wstring_view dino_status_string2 = L"254 + 254 | %.1f %%";
+constexpr std::wstring_view max_dino_status_string1 = L"%.1f | 254 + 254";
+constexpr std::wstring_view max_dino_status_string2 = L"%.1f %% | 254 + 254";
 
 void __fastcall GetStatusValueString(void* self, void* result, int ValueType, void* bValueOnly)
 {
@@ -150,11 +147,11 @@ void __fastcall GetStatusValueString(void* self, void* result, int ValueType, vo
     {
         if (ValueType < 8)
         {
-            std::memcpy(status_string_address1, original::status_string1.data(), (original::status_string1.size() + 1) * sizeof(wchar_t));
+            std::memcpy(max_status_string_address1, original::max_status_string1.data(), (original::max_status_string1.size() + 1) * sizeof(wchar_t));
         }
         else
         {
-            std::memcpy(status_string_address2, original::status_string2.data(), (original::status_string2.size() + 1) * sizeof(wchar_t));
+            std::memcpy(max_status_string_address2, original::max_status_string2.data(), (original::max_status_string2.size() + 1) * sizeof(wchar_t));
         }
         original::GetStatusValueString(self, result, ValueType, bValueOnly);
         return;
@@ -203,9 +200,9 @@ bool patch_constant_string(std::byte* address, const std::byte* string)
 bool patch()
 {
     {
-        auto const target_address = get_rva(0x5A7C09);
-        status_string_address1 = malloc((hook::dino_status_string1.size() + 1) * 2, target_address);
-        if (!status_string_address1)
+        auto const target_address = get_rva(0x5A7ACC);
+        max_status_string_address1 = malloc((hook::max_dino_status_string1.size() + 1) * 2, target_address);
+        if (!max_status_string_address1)
         {
     #ifdef PROJECT_DEBUG
             MessageBoxA(
@@ -217,14 +214,14 @@ bool patch()
             return false;
         }
     
-        patch_constant_string(target_address, status_string_address1);
-        // std::memcpy(status_string_address1, string.data(), size);
+        patch_constant_string(target_address, max_status_string_address1);
+        // std::memcpy(max_status_string_address1, string.data(), size);
     }
 
     {
         auto const target_address = get_rva(0x5A7A53);
-        status_string_address2 = malloc((hook::dino_status_string2.size() + 1) * 2, target_address);
-        if (!status_string_address2)
+        max_status_string_address2 = malloc((hook::max_dino_status_string2.size() + 1) * 2, target_address);
+        if (!max_status_string_address2)
         {
     #ifdef PROJECT_DEBUG
             MessageBoxA(
@@ -236,7 +233,7 @@ bool patch()
             return false;
         }
     
-        patch_constant_string(target_address, status_string_address2);
+        patch_constant_string(target_address, max_status_string_address2);
     }
     return true;
 }
