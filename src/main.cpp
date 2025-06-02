@@ -11,6 +11,94 @@
 
 std::byte* status_string_address1;
 std::byte* status_string_address2;
+bool is_single_player = true;
+
+static void update_person_status(u8 point, int ValueType) noexcept
+{
+    if (ValueType < 8)
+    {
+        auto str = reinterpret_cast<wchar_t*>(status_string_address1);
+        auto end = fmt::format_to(str, L"{} | %.1f / ", point);
+        *end = '\0';
+    }
+    else
+    {
+        auto str = reinterpret_cast<wchar_t*>(status_string_address2);
+        auto end = fmt::format_to(str, L"{} | %.1f %%", point);
+        *end = '\0';
+    }
+}
+
+void single_player(void* self, int ValueType, bool is_dino) noexcept
+{
+    auto const NumberOfLevelUpPointsApplied = reinterpret_cast<u8*>(reinterpret_cast<std::byte*>(self) + 0x138);
+    auto const point = NumberOfLevelUpPointsApplied[ValueType];
+    if (is_dino)
+    {
+        auto const NumberOfLevelUpPointsAppliedTamed = reinterpret_cast<u8*>(reinterpret_cast<std::byte*>(self) + 0x144);
+        auto const tame_point = NumberOfLevelUpPointsAppliedTamed[ValueType];
+        if (ValueType < 8)
+        {
+            auto str = reinterpret_cast<wchar_t*>(status_string_address1);
+            auto end = fmt::format_to(str, L"{} + {} | %.1f / ", point, tame_point);
+            *end = '\0';
+        }
+        else
+        {
+            auto str = reinterpret_cast<wchar_t*>(status_string_address2);
+            auto end = fmt::format_to(str, L"{} + {} | %.1f %%", point, tame_point);
+            *end = '\0';
+        }
+    }
+    else
+    {
+        update_person_status(point, ValueType);
+    }
+}
+
+void server_player(void* self, int ValueType, bool is_dino) noexcept
+{
+    auto const MaxStatusValues = reinterpret_cast<f32*>(reinterpret_cast<std::byte*>(self) + 0xD8);
+    if (is_dino)
+    {
+        
+    }
+    else
+    {
+        constexpr f32 base_value[]
+        {
+            100,
+            100,
+            200,
+            100,
+            100,
+            100,
+            0,
+            100,
+            0,
+            0,
+            2,
+            0,
+        };
+        constexpr f32 per_level_value[]
+        {
+            10,
+            10,
+            0,
+            20,
+            10,
+            10,
+            0,
+            10,
+            0.05,
+            0.015,
+            2,
+            0.1,
+        };
+        auto const point = static_cast<u8>((MaxStatusValues[ValueType] - base_value[ValueType]) / per_level_value[ValueType]);
+        update_person_status(point, ValueType);
+    }
+}
 
 NAMESPACE_BEGIN(original)
 
@@ -72,46 +160,20 @@ void __fastcall GetStatusValueString(void* self, void* result, int ValueType, vo
         return;
     }
 
-    auto const NumberOfLevelUpPointsApplied = reinterpret_cast<u8*>(reinterpret_cast<std::byte*>(self) + 0x138);
-    auto const point = NumberOfLevelUpPointsApplied[ValueType];
-
     auto const AActor = original::GetPrimalCharacter(self);
     auto const AActor_vtable_address = *reinterpret_cast<usize*>(AActor);
     auto const AActor_IsPrimalDino_address = *reinterpret_cast<usize*>(AActor_vtable_address + 0x860);
     auto const IsPrimalDino = reinterpret_cast<original::fn_IsPrimalDino>(AActor_IsPrimalDino_address);
-    if (IsPrimalDino(AActor))
+    auto const is_dino = IsPrimalDino(AActor);
+
+    if (is_single_player)
     {
-        auto const NumberOfLevelUpPointsAppliedTamed = reinterpret_cast<u8*>(reinterpret_cast<std::byte*>(self) + 0x144);
-        auto const tame_point = NumberOfLevelUpPointsAppliedTamed[ValueType];
-        if (ValueType < 8)
-        {
-            auto str = reinterpret_cast<wchar_t*>(status_string_address1);
-            auto end = fmt::format_to(str, L"{} + {} | %.1f / ", point, tame_point);
-            *end = '\0';
-        }
-        else
-        {
-            auto str = reinterpret_cast<wchar_t*>(status_string_address2);
-            auto end = fmt::format_to(str, L"{} + {} | %.1f %%", point, tame_point);
-            *end = '\0';
-        }
+        single_player(self, ValueType, is_dino);
     }
     else
     {
-        if (ValueType < 8)
-        {
-            auto str = reinterpret_cast<wchar_t*>(status_string_address1);
-            auto end = fmt::format_to(str, L"{} | %.1f / ", point);
-            *end = '\0';
-        }
-        else
-        {
-            auto str = reinterpret_cast<wchar_t*>(status_string_address2);
-            auto end = fmt::format_to(str, L"{} | %.1f %%", point);
-            *end = '\0';
-        }
+        server_player(self, ValueType, is_dino);
     }
-
     original::GetStatusValueString(self, result, ValueType, bValueOnly);
 }
 
