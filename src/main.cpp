@@ -15,7 +15,7 @@ bool is_single_player = true;
 
 static void update_person_status(u8 point, int ValueType) noexcept
 {
-    if (ValueType < 8)
+    if (ValueType < 8 || ValueType == 10)
     {
         auto str = reinterpret_cast<wchar_t*>(max_status_string_address1);
         auto end = fmt::format_to(str, L"%.1f | {}", point);
@@ -77,7 +77,7 @@ void server_player(void* self, int ValueType, bool is_dino) noexcept
             100,
             0,
             0,
-            2,
+            0,
             0,
         };
         constexpr f32 per_level_value[]
